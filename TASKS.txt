@@ -1,0 +1,11 @@
+TASKS:
+
+    
+  (0-0)
+ >-|_|-< 
+  _/ \_
+
+[x] > Make call to openWeatherMaps to get CHCH weather data
+[x] > Update text on main screen to show some CHCH weather data
+[ ] > Show Show Max/Mins for 5 day forecast - text only
+[ ] > Show CURRENT data using weather call - not forecast - text only
