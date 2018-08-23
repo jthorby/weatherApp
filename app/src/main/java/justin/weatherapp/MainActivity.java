@@ -38,10 +38,12 @@ public class MainActivity extends AppCompatActivity {
     private void handleRequest() {
         // Instantiate the RequestQueue.
         RequestQueue queue = Volley.newRequestQueue(this);
-        String url ="http://api.openweathermap.org/data/2.5/forecast?id=" + christchurchID + "&appid=" + apiKey;
+        String baseURL = "http://api.openweathermap.org/data/2.5/";
+        String forecastURL = baseURL + "forecast?id=" + christchurchID + "&appid=" + apiKey;
+        String weatherURL = baseURL + "weather?id=" + christchurchID + "&appid=" + apiKey;
 
         // Request a string response from the provided URL.
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, weatherURL,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -64,16 +66,18 @@ public class MainActivity extends AppCompatActivity {
 
     private void handleResponse(String response) throws JSONException {
         jsonObject = new JSONObject(response);
-        JSONArray weatherArray = jsonObject.getJSONArray("list");
-        JSONObject currentData = weatherArray.getJSONObject(0);
-        JSONObject mainData = currentData.getJSONObject("main");
+        JSONObject mainData = jsonObject.getJSONObject("main");
         double tempKelvin = mainData.getDouble("temp");
         double tempCelsius = tempKelvin - 273.15;
+        JSONObject cloudData = jsonObject.getJSONObject("clouds");
+        int cloudiness = cloudData.getInt("all");
 
-        String tempCelsius1dp = String.format("The temperature is %.1f", tempCelsius);
+        String tempCelsius1dp = String.format("The temperature is %.1f\u00b0C",
+                                               tempCelsius);
 
-        weatherText.setText(tempCelsius1dp + "\u00b0C");
 
+        weatherText.setText(String.format("%s and cloudiness is %d", tempCelsius1dp, cloudiness));
+        weatherText.setText(jsonObject.toString());
     }
 
 }
