@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         weatherText.setText(String.format("%s and cloudiness is %d", tempCelsius1dp, cloudiness));
-        weatherText.setText(jsonObject.toString());
+//        weatherText.setText(jsonObject.toString());
     }
 
 }
