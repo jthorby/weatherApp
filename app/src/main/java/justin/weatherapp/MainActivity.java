@@ -2,6 +2,9 @@ package justin.weatherapp;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.SparseArray;
+import android.widget.ImageView;
+import android.widget.SearchView;
 import android.widget.TextView;
 
 import com.android.volley.Request;
@@ -15,32 +18,62 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class MainActivity extends AppCompatActivity {
     final String christchurchID = "2192362";
+    final String darwinID = "2073124";
+    final String dunedinID = "2191562";
     final String apiKey = "97b29ff78ac13197be0271410939a9f6";
 
     TextView weatherText;
     JSONObject jsonObject;
+    Map<String, Integer> weatherIconMap = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        setupCitySearch();
+
+        setupIconMap();
         showWeatherData();
     }
 
     private void showWeatherData() {
         weatherText = findViewById(R.id.weatherData);
-        handleRequest();
+        handleRequest(christchurchID);
     }
 
-    private void handleRequest() {
+    private void setupCitySearch() {
+        SearchView citySearchView = findViewById(R.id.citySearchView);
+        citySearchView.setQueryHint("search for a city...");
+
+        citySearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                onSearchRequested();
+                query = query.toLowerCase();
+                
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
+    }
+
+    private void handleRequest(String cityId) {
         // Instantiate the RequestQueue.
         RequestQueue queue = Volley.newRequestQueue(this);
         String baseURL = "http://api.openweathermap.org/data/2.5/";
-        String forecastURL = baseURL + "forecast?id=" + christchurchID + "&appid=" + apiKey;
-        String weatherURL = baseURL + "weather?id=" + christchurchID + "&appid=" + apiKey;
+        String forecastURL = baseURL + "forecast?id=" + cityId + "&appid=" + apiKey;
+        String weatherURL = baseURL + "weather?id=" + cityId + "&appid=" + apiKey;
 
         // Request a string response from the provided URL.
         StringRequest stringRequest = new StringRequest(Request.Method.GET, weatherURL,
@@ -69,15 +102,48 @@ public class MainActivity extends AppCompatActivity {
         JSONObject mainData = jsonObject.getJSONObject("main");
         double tempKelvin = mainData.getDouble("temp");
         double tempCelsius = tempKelvin - 273.15;
-        JSONObject cloudData = jsonObject.getJSONObject("clouds");
-        int cloudiness = cloudData.getInt("all");
 
-        String tempCelsius1dp = String.format("The temperature is %.1f\u00b0C",
-                                               tempCelsius);
+        String cityName = jsonObject.getString("name");
+        TextView cityText = findViewById(R.id.cityText);
+        cityText.setText(cityName);
 
+        JSONArray weatherArray = jsonObject.getJSONArray("weather");
+        JSONObject weather = (JSONObject) weatherArray.get(0);
+        String weatherConditionIcon = weather.getString("icon");
 
-        weatherText.setText(String.format("%s and cloudiness is %d", tempCelsius1dp, cloudiness));
-//        weatherText.setText(jsonObject.toString());
+        String tempCelsius1dp = String.format("%.1f\u00b0C", tempCelsius);
+        weatherText.setText(tempCelsius1dp);
+//        weatherText.setText(jsonObject.toString()); // display the whole json output
+
+        ImageView weatherIconView = findViewById(R.id.weatherIconView);
+        weatherIconView.setImageResource(weatherIconMap.get(weatherConditionIcon));
+    }
+
+    private void setupIconMap() {
+        int clear = R.drawable.clearsky;
+        int cloudy = R.drawable.cloudy;
+        int rain = R.drawable.rain;
+        int unknown = R.drawable.ic_launcher_foreground;
+
+        weatherIconMap.put("01d", clear);
+        weatherIconMap.put("02d", clear);
+        weatherIconMap.put("03d", cloudy);
+        weatherIconMap.put("04d", cloudy);
+        weatherIconMap.put("09d", rain);
+        weatherIconMap.put("10d", rain);
+        weatherIconMap.put("11d", unknown);
+        weatherIconMap.put("13d", rain);
+        weatherIconMap.put("50d", unknown);
+
+        weatherIconMap.put("01n", clear);
+        weatherIconMap.put("02n", clear);
+        weatherIconMap.put("03n", cloudy);
+        weatherIconMap.put("04n", cloudy);
+        weatherIconMap.put("09n", rain);
+        weatherIconMap.put("10n", rain);
+        weatherIconMap.put("11n", unknown);
+        weatherIconMap.put("13n", rain);
+        weatherIconMap.put("50n", unknown);
     }
 
 }
