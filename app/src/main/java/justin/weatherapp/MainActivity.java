@@ -3,6 +3,7 @@ package justin.weatherapp;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.SparseArray;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.SearchView;
 import android.widget.TextView;
@@ -36,8 +37,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        setupCitySearch();
-
+        setupForecastGrid();
         setupIconMap();
         showWeatherData();
     }
@@ -47,25 +47,9 @@ public class MainActivity extends AppCompatActivity {
         handleRequest(christchurchID);
     }
 
-    private void setupCitySearch() {
-        SearchView citySearchView = findViewById(R.id.citySearchView);
-        citySearchView.setQueryHint("search for a city...");
-
-        citySearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                onSearchRequested();
-                query = query.toLowerCase();
-                
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                return false;
-            }
-        });
+    private void setupForecastGrid() {
+        GridView gridView = findViewById(R.id.forecastGrid);
+        gridView.setAdapter(new WeatherIconAdapter(this));
     }
 
     private void handleRequest(String cityId) {
@@ -113,7 +97,6 @@ public class MainActivity extends AppCompatActivity {
 
         String tempCelsius1dp = String.format("%.1f\u00b0C", tempCelsius);
         weatherText.setText(tempCelsius1dp);
-//        weatherText.setText(jsonObject.toString()); // display the whole json output
 
         ImageView weatherIconView = findViewById(R.id.weatherIconView);
         weatherIconView.setImageResource(weatherIconMap.get(weatherConditionIcon));
