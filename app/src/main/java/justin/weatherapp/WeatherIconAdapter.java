@@ -1,7 +1,7 @@
 package justin.weatherapp;
 
 import android.content.Context;
-import android.media.Image;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -26,19 +26,12 @@ public class WeatherIconAdapter extends BaseAdapter {
     final String christchurchID = "2192362";
     private final int NUM_COLS = 4;
     private Context context;
-    private Integer[] gridIcons = {
-            R.drawable.rain,
-            R.drawable.cloudy,
-            R.drawable.clearsky,
-            R.drawable.ic_launcher_foreground
-    };
-    private JSONArray jsonObject;
+    private JSONArray jsonArray;
     Map<String, Integer> weatherIconMap = new HashMap<>();
 
     public WeatherIconAdapter(Context context) {
         this.context = context;
         setupIconMap();
-        handleRequest();
     }
 
     @Override
@@ -58,6 +51,11 @@ public class WeatherIconAdapter extends BaseAdapter {
 
     @Override
     public View getView(int i, View view, ViewGroup parent) {
+        if (jsonArray == null) {
+            handleRequest();
+//            Log.d("=======", jsonArray.toString());
+        }
+
         ImageView imageView;
         if (view == null) {
             imageView = new ImageView(context);
@@ -73,7 +71,18 @@ public class WeatherIconAdapter extends BaseAdapter {
     }
 
     private void addForecastToGridItem(ImageView imageView, int i) {
-        JSON
+        if (jsonArray != null) {
+            try {
+                JSONObject object = (JSONObject) jsonArray.get(0);
+                JSONObject mainData = object.getJSONObject("main");
+                JSONArray weatherArray = object.getJSONArray("weather");
+                JSONObject weather = (JSONObject) weatherArray.get(0);
+                String forecastIcon = weather.getString("icon");
+                imageView.setImageResource(weatherIconMap.get(forecastIcon));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private void handleRequest() {
@@ -88,7 +97,9 @@ public class WeatherIconAdapter extends BaseAdapter {
                     public void onResponse(String response) {
                         try {
                             handleResponse(response);
+                            Log.d("+++++++++", (jsonArray.toString()));
                         } catch (JSONException e) {
+                            e.printStackTrace();
                         }
                     }
                 }, new Response.ErrorListener() {
@@ -100,7 +111,8 @@ public class WeatherIconAdapter extends BaseAdapter {
     }
 
     private void handleResponse(String response) throws JSONException {
-        jsonObject = new JSONObject(response);
+        JSONObject json = new JSONObject(response);
+        WeatherIconAdapter.this.jsonArray = json.getJSONArray("list");
     }
 
     private void setupIconMap() {

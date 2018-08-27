@@ -37,9 +37,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        setupForecastGrid();
         setupIconMap();
         showWeatherData();
+        setupForecastGrid();
     }
 
     private void showWeatherData() {
