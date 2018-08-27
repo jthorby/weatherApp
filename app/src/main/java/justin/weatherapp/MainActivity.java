@@ -128,5 +128,4 @@ public class MainActivity extends AppCompatActivity {
         weatherIconMap.put("13n", rain);
         weatherIconMap.put("50n", unknown);
     }
-
 }
