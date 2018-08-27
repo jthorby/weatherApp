@@ -1,6 +1,7 @@
 package justin.weatherapp;
 
 import android.content.Context;
+import android.util.JsonWriter;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,20 +19,27 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 
 public class WeatherIconAdapter extends BaseAdapter {
     final String apiKey = "97b29ff78ac13197be0271410939a9f6";
     final String christchurchID = "2192362";
+    final String darwinID = "2073124";
+    final String dunedinID = "2191562";
+    final String minneapolisID = "5037649";
     private final int NUM_COLS = 4;
     private Context context;
-    private JSONArray jsonArray;
     Map<String, Integer> weatherIconMap = new HashMap<>();
 
     public WeatherIconAdapter(Context context) {
         this.context = context;
         setupIconMap();
+        handleRequest();
     }
 
     @Override
@@ -51,11 +59,6 @@ public class WeatherIconAdapter extends BaseAdapter {
 
     @Override
     public View getView(int i, View view, ViewGroup parent) {
-        if (jsonArray == null) {
-            handleRequest();
-//            Log.d("=======", jsonArray.toString());
-        }
-
         ImageView imageView;
         if (view == null) {
             imageView = new ImageView(context);
@@ -71,9 +74,21 @@ public class WeatherIconAdapter extends BaseAdapter {
     }
 
     private void addForecastToGridItem(ImageView imageView, int i) {
+        File directory = context.getFilesDir();
+        File file = new File(directory, "forecast.json");
+        JSONArray jsonArray = null;
+
+        try {
+            String content = FileUtilities.getFileContents(file);
+            jsonArray = new JSONArray(content);
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+        }
+
+
         if (jsonArray != null) {
             try {
-                JSONObject object = (JSONObject) jsonArray.get(0);
+                JSONObject object = (JSONObject) jsonArray.get((i * 8) + 8);
                 JSONObject mainData = object.getJSONObject("main");
                 JSONArray weatherArray = object.getJSONArray("weather");
                 JSONObject weather = (JSONObject) weatherArray.get(0);
@@ -88,7 +103,7 @@ public class WeatherIconAdapter extends BaseAdapter {
     private void handleRequest() {
         RequestQueue queue = Volley.newRequestQueue(context);
         String baseURL = "http://api.openweathermap.org/data/2.5/";
-        String cityId = christchurchID;
+        String cityId = minneapolisID;
         String forecastURL = baseURL + "forecast?id=" + cityId + "&appid=" + apiKey;
 
         StringRequest stringRequest = new StringRequest(Request.Method.GET, forecastURL,
@@ -97,14 +112,15 @@ public class WeatherIconAdapter extends BaseAdapter {
                     public void onResponse(String response) {
                         try {
                             handleResponse(response);
-                            Log.d("+++++++++", (jsonArray.toString()));
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
                     }
                 }, new Response.ErrorListener() {
             @Override
-            public void onErrorResponse(VolleyError error) {}
+            public void onErrorResponse(VolleyError error) {
+                error.printStackTrace();
+            }
         });
 
         queue.add(stringRequest);
@@ -112,33 +128,39 @@ public class WeatherIconAdapter extends BaseAdapter {
 
     private void handleResponse(String response) throws JSONException {
         JSONObject json = new JSONObject(response);
-        WeatherIconAdapter.this.jsonArray = json.getJSONArray("list");
+        JSONArray jsonArray= json.getJSONArray("list");
+        String filename = "forecast.json";
+        String fileContents = jsonArray.toString();
+        FileOutputStream outputStream;
+
+        try {
+            outputStream = context.openFileOutput(filename, Context.MODE_PRIVATE);
+            outputStream.write(fileContents.getBytes());
+            outputStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void setupIconMap() {
-        int clear = R.drawable.clearsky;
-        int cloudy = R.drawable.cloudy;
-        int rain = R.drawable.rain;
-        int unknown = R.drawable.ic_launcher_foreground;
+        weatherIconMap.put("01d", R.drawable.clearsky);
+        weatherIconMap.put("02d", R.drawable.few_clouds);
+        weatherIconMap.put("03d", R.drawable.scattered_clouds);
+        weatherIconMap.put("04d", R.drawable.broken_clouds);
+        weatherIconMap.put("09d", R.drawable.shower_rain);
+        weatherIconMap.put("10d", R.drawable.rain);
+        weatherIconMap.put("11d", R.drawable.thunder);
+        weatherIconMap.put("13d", R.drawable.snow);
+        weatherIconMap.put("50d", R.drawable.mist);
 
-        weatherIconMap.put("01d", clear);
-        weatherIconMap.put("02d", clear);
-        weatherIconMap.put("03d", cloudy);
-        weatherIconMap.put("04d", cloudy);
-        weatherIconMap.put("09d", rain);
-        weatherIconMap.put("10d", rain);
-        weatherIconMap.put("11d", unknown);
-        weatherIconMap.put("13d", rain);
-        weatherIconMap.put("50d", unknown);
-
-        weatherIconMap.put("01n", clear);
-        weatherIconMap.put("02n", clear);
-        weatherIconMap.put("03n", cloudy);
-        weatherIconMap.put("04n", cloudy);
-        weatherIconMap.put("09n", rain);
-        weatherIconMap.put("10n", rain);
-        weatherIconMap.put("11n", unknown);
-        weatherIconMap.put("13n", rain);
-        weatherIconMap.put("50n", unknown);
+        weatherIconMap.put("01n", R.drawable.clearsky);
+        weatherIconMap.put("02n", R.drawable.few_clouds);
+        weatherIconMap.put("03n", R.drawable.scattered_clouds);
+        weatherIconMap.put("04n", R.drawable.broken_clouds);
+        weatherIconMap.put("09n", R.drawable.shower_rain);
+        weatherIconMap.put("10n", R.drawable.rain);
+        weatherIconMap.put("11n", R.drawable.thunder);
+        weatherIconMap.put("13n", R.drawable.snow);
+        weatherIconMap.put("50n", R.drawable.mist);
     }
 }

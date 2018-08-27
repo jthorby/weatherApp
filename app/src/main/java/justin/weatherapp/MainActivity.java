@@ -26,6 +26,7 @@ public class MainActivity extends AppCompatActivity {
     final String christchurchID = "2192362";
     final String darwinID = "2073124";
     final String dunedinID = "2191562";
+    final String minneapolisID = "5037649";
     final String apiKey = "97b29ff78ac13197be0271410939a9f6";
 
     TextView weatherText;
@@ -44,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void showWeatherData() {
         weatherText = findViewById(R.id.weatherData);
-        handleRequest(christchurchID);
+        handleRequest(minneapolisID);
     }
 
     private void setupForecastGrid() {
@@ -56,7 +57,6 @@ public class MainActivity extends AppCompatActivity {
         // Instantiate the RequestQueue.
         RequestQueue queue = Volley.newRequestQueue(this);
         String baseURL = "http://api.openweathermap.org/data/2.5/";
-        String forecastURL = baseURL + "forecast?id=" + cityId + "&appid=" + apiKey;
         String weatherURL = baseURL + "weather?id=" + cityId + "&appid=" + apiKey;
 
         // Request a string response from the provided URL.
@@ -103,29 +103,24 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupIconMap() {
-        int clear = R.drawable.clearsky;
-        int cloudy = R.drawable.cloudy;
-        int rain = R.drawable.rain;
-        int unknown = R.drawable.ic_launcher_foreground;
+        weatherIconMap.put("01d", R.drawable.clearsky);
+        weatherIconMap.put("02d", R.drawable.few_clouds);
+        weatherIconMap.put("03d", R.drawable.scattered_clouds);
+        weatherIconMap.put("04d", R.drawable.broken_clouds);
+        weatherIconMap.put("09d", R.drawable.shower_rain);
+        weatherIconMap.put("10d", R.drawable.rain);
+        weatherIconMap.put("11d", R.drawable.thunder);
+        weatherIconMap.put("13d", R.drawable.snow);
+        weatherIconMap.put("50d", R.drawable.mist);
 
-        weatherIconMap.put("01d", clear);
-        weatherIconMap.put("02d", clear);
-        weatherIconMap.put("03d", cloudy);
-        weatherIconMap.put("04d", cloudy);
-        weatherIconMap.put("09d", rain);
-        weatherIconMap.put("10d", rain);
-        weatherIconMap.put("11d", unknown);
-        weatherIconMap.put("13d", rain);
-        weatherIconMap.put("50d", unknown);
-
-        weatherIconMap.put("01n", clear);
-        weatherIconMap.put("02n", clear);
-        weatherIconMap.put("03n", cloudy);
-        weatherIconMap.put("04n", cloudy);
-        weatherIconMap.put("09n", rain);
-        weatherIconMap.put("10n", rain);
-        weatherIconMap.put("11n", unknown);
-        weatherIconMap.put("13n", rain);
-        weatherIconMap.put("50n", unknown);
+        weatherIconMap.put("01n", R.drawable.clearsky);
+        weatherIconMap.put("02n", R.drawable.few_clouds);
+        weatherIconMap.put("03n", R.drawable.scattered_clouds);
+        weatherIconMap.put("04n", R.drawable.broken_clouds);
+        weatherIconMap.put("09n", R.drawable.shower_rain);
+        weatherIconMap.put("10n", R.drawable.rain);
+        weatherIconMap.put("11n", R.drawable.thunder);
+        weatherIconMap.put("13n", R.drawable.snow);
+        weatherIconMap.put("50n", R.drawable.mist);
     }
 }
